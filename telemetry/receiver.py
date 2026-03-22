@@ -49,17 +49,30 @@ _SIZE_WITH_ID = struct.calcsize(_FMT_WITH_ID)        # 96 bytes
 class TelemetryState:
     """Structured snapshot of vehicle telemetry at a single point in time."""
 
-    speed: float = 0.0       # km/h
-    rpm: float = 0.0         # rev/min
-    gear: int = 1            # 0=Reverse, 1=Neutral, 2=1st, 3=2nd …
-    throttle: float = 0.0    # 0–1
-    brake: float = 0.0       # 0–1
-    fuel: float = 0.0        # 0–1
+    speed: float = 0.0        # km/h  (vehicle ground speed)
+    rpm: float = 0.0          # rev/min
+    gear: int = 1             # 0=Reverse, 1=Neutral, 2=1st, 3=2nd …
+    throttle: float = 0.0     # 0–1
+    brake: float = 0.0        # 0–1
+    fuel: float = 0.0         # 0–1
+    max_rpm: float = 8000.0   # vehicle-specific rev limit (dynamic)
+    air_speed: float = 0.0    # airspeed in km/h (same source, separate display)
+    clutch: float = 0.0       # 0–1
+    turbo: float = 0.0        # turbo pressure (bar)
+    eng_temp: float = 0.0     # engine temperature (°C)
+    wheel_power: float = 0.0  # estimated wheel-power index (0–1)
     timestamp: float = field(default_factory=time.time)
 
 
 class OutGaugeParser:
     """Parses raw BeamNG OutGauge UDP payloads into TelemetryState objects."""
+
+    # Minimum sensible rev limit – avoids absurdly small scale at low idle RPM.
+    _MIN_MAX_RPM: float = 4000.0
+
+    def __init__(self) -> None:
+        # Running maximum used to build a vehicle-specific, dynamic rev limit.
+        self._max_rpm_observed: float = self._MIN_MAX_RPM
 
     def parse(self, data: bytes) -> Optional[TelemetryState]:
         """Return a TelemetryState parsed from *data*, or None on failure."""
@@ -74,18 +87,39 @@ class OutGaugeParser:
             # Positional unpacking matches the format order above.
             speed_ms = fields[5]
             rpm = fields[6]
+            turbo = fields[7]
+            eng_temp = fields[8]
             fuel = fields[9]
             throttle = fields[14]
             brake = fields[15]
+            clutch = fields[16]
             gear = int(fields[3])
 
+            rpm = max(0.0, rpm)
+
+            # Track vehicle-specific max RPM dynamically.
+            if rpm > self._max_rpm_observed:
+                self._max_rpm_observed = rpm
+
+            # Estimated wheel-power index: fraction of peak power currently
+            # being delivered (throttle scaled by relative engine speed).
+            wheel_power = max(0.0, min(1.0, throttle * (rpm / self._max_rpm_observed)))
+
+            speed_kmh = speed_ms * 3.6  # m/s → km/h
+
             return TelemetryState(
-                speed=speed_ms * 3.6,  # m/s → km/h
-                rpm=max(0.0, rpm),
+                speed=speed_kmh,
+                rpm=rpm,
                 gear=gear,
                 throttle=max(0.0, min(1.0, throttle)),
                 brake=max(0.0, min(1.0, brake)),
                 fuel=max(0.0, min(1.0, fuel)),
+                max_rpm=self._max_rpm_observed,
+                air_speed=speed_kmh,
+                clutch=max(0.0, min(1.0, clutch)),
+                turbo=max(0.0, turbo),
+                eng_temp=max(0.0, eng_temp),
+                wheel_power=wheel_power,
                 timestamp=time.time(),
             )
         except struct.error:

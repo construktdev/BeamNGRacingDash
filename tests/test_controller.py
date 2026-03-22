@@ -63,6 +63,12 @@ class TestUpdateController:
                 "throttle": round(state.throttle, 3),
                 "brake": round(state.brake, 3),
                 "fuel": round(state.fuel, 3),
+                "maxRpm": round(state.max_rpm, 0),
+                "airSpeed": round(state.air_speed, 1),
+                "clutch": round(state.clutch, 3),
+                "turbo": round(state.turbo, 3),
+                "engTemp": round(state.eng_temp, 1),
+                "wheelPower": round(state.wheel_power, 3),
             }
         )
         await ws.send_str(payload)
@@ -72,6 +78,12 @@ class TestUpdateController:
         assert data["speed"] == round(99.9, 1)
         assert data["rpm"] == 6000.0
         assert data["gear"] == 4
+        assert "maxRpm" in data
+        assert "airSpeed" in data
+        assert "clutch" in data
+        assert "turbo" in data
+        assert "engTemp" in data
+        assert "wheelPower" in data
 
     @pytest.mark.asyncio
     async def test_broadcast_loop_removes_dead_clients(self):

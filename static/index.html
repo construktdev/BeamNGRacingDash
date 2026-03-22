@@ -13,9 +13,14 @@
     <div class="gauge-wrap">
       <canvas id="speedometer" width="280" height="280"></canvas>
       <span class="gauge-unit">km/h</span>
+      <div class="air-speed-row">
+        <span class="air-speed-label">AIR</span>
+        <span id="air-speed-value" class="air-speed-value">0</span>
+        <span class="air-speed-unit">km/h</span>
+      </div>
     </div>
 
-    <!-- Centre panel: gear, pedals, connection status -->
+    <!-- Centre panel: gear, pedals, telemetry, connection status -->
     <div id="center-panel">
       <div id="gear-display">N</div>
 
@@ -37,6 +42,32 @@
           <div class="bar-track">
             <div id="brake-bar" class="bar-fill bar-brake"></div>
           </div>
+        </div>
+        <div class="pedal-group">
+          <span class="pedal-label">CLT</span>
+          <div class="bar-track">
+            <div id="clutch-bar" class="bar-fill bar-clutch"></div>
+          </div>
+        </div>
+        <div class="pedal-group">
+          <span class="pedal-label">PWR</span>
+          <div class="bar-track">
+            <div id="power-bar" class="bar-fill bar-power"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Extra telemetry: turbo & engine temp -->
+      <div id="extra-telemetry">
+        <div class="telem-item">
+          <span class="telem-label">TURBO</span>
+          <span id="turbo-value" class="telem-value">0.00</span>
+          <span class="telem-unit">bar</span>
+        </div>
+        <div class="telem-item">
+          <span class="telem-label">ENG</span>
+          <span id="eng-temp-value" class="telem-value">0</span>
+          <span class="telem-unit">°C</span>
         </div>
       </div>
 
