@@ -31,8 +31,7 @@ html, body {
 
 .gauge-wrap canvas {
   display: block;
-  /* subtle drop shadow for depth */
-  filter: drop-shadow(0 0 12px rgba(0, 160, 255, 0.25));
+  filter: drop-shadow(0 0 16px rgba(0, 140, 255, 0.3));
 }
 
 .gauge-unit {
@@ -42,13 +41,42 @@ html, body {
   color: #666;
 }
 
+/* ── Air speed row ────────────────────────────────────────────────────────── */
+.air-speed-row {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  margin-top: 2px;
+}
+
+.air-speed-label {
+  font-size: 0.6rem;
+  letter-spacing: 0.12em;
+  color: #555;
+  text-transform: uppercase;
+}
+
+.air-speed-value {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #00aaff;
+  font-variant-numeric: tabular-nums;
+  min-width: 2.5ch;
+  text-align: right;
+}
+
+.air-speed-unit {
+  font-size: 0.6rem;
+  color: #555;
+}
+
 /* ── Centre panel ─────────────────────────────────────────────────────────── */
 #center-panel {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 20px;
-  min-width: 120px;
+  gap: 16px;
+  min-width: 130px;
 }
 
 /* ── Gear display ─────────────────────────────────────────────────────────── */
@@ -67,7 +95,7 @@ html, body {
 .pedal-row {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 7px;
   width: 100%;
 }
 
@@ -78,19 +106,20 @@ html, body {
 }
 
 .pedal-label {
-  font-size: 0.65rem;
+  font-size: 0.6rem;
   letter-spacing: 0.1em;
-  color: #666;
+  color: #555;
   width: 30px;
   text-align: right;
 }
 
 .bar-track {
   flex: 1;
-  height: 10px;
-  background: #1e1e2a;
+  height: 9px;
+  background: #1a1a26;
   border-radius: 5px;
   overflow: hidden;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.6);
 }
 
 .bar-fill {
@@ -100,9 +129,43 @@ html, body {
   transition: width 80ms linear;
 }
 
-.bar-fuel     { background: linear-gradient(90deg, #00aaff, #00ddff); }
-.bar-throttle { background: linear-gradient(90deg, #00cc44, #66ff88); }
-.bar-brake    { background: linear-gradient(90deg, #ff3300, #ff7744); }
+.bar-fuel     { background: linear-gradient(90deg, #0077cc, #00aaff); }
+.bar-throttle { background: linear-gradient(90deg, #00aa33, #44ff88); }
+.bar-brake    { background: linear-gradient(90deg, #cc2200, #ff5533); }
+.bar-clutch   { background: linear-gradient(90deg, #aa6600, #ffcc44); }
+.bar-power    { background: linear-gradient(90deg, #880099, #dd44ff); }
+
+/* ── Extra telemetry row ──────────────────────────────────────────────────── */
+#extra-telemetry {
+  display: flex;
+  gap: 12px;
+}
+
+.telem-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+}
+
+.telem-label {
+  font-size: 0.55rem;
+  letter-spacing: 0.1em;
+  color: #555;
+  text-transform: uppercase;
+}
+
+.telem-value {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #dda030;
+  font-variant-numeric: tabular-nums;
+}
+
+.telem-unit {
+  font-size: 0.55rem;
+  color: #555;
+}
 
 /* ── Connection status ────────────────────────────────────────────────────── */
 #connection-status {

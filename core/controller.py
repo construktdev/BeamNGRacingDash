@@ -65,6 +65,12 @@ class UpdateController:
                     "throttle": round(state.throttle, 3),
                     "brake": round(state.brake, 3),
                     "fuel": round(state.fuel, 3),
+                    "maxRpm": round(state.max_rpm, 0),
+                    "airSpeed": round(state.air_speed, 1),
+                    "clutch": round(state.clutch, 3),
+                    "turbo": round(state.turbo, 3),
+                    "engTemp": round(state.eng_temp, 1),
+                    "wheelPower": round(state.wheel_power, 3),
                 }
             )
 

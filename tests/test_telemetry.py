@@ -5,6 +5,8 @@ Covers:
   - OutGaugeParser with full (96-byte) and minimal (92-byte) packets
   - OutGaugeParser rejects packets that are too short
   - TelemetryState field values and unit conversions
+  - Dynamic max RPM tracking
+  - Additional telemetry fields (clutch, turbo, eng_temp, wheel_power, air_speed)
 """
 
 import struct
@@ -29,6 +31,9 @@ def _make_packet(
     throttle: float = 0.5,
     brake: float = 0.0,
     fuel: float = 0.8,
+    turbo: float = 0.0,
+    eng_temp: float = 90.0,
+    clutch: float = 0.0,
     include_id: bool = True,
 ) -> bytes:
     """Build a syntactically valid OutGauge packet."""
@@ -41,8 +46,8 @@ def _make_packet(
         0,             # spare_b
         speed_ms,      # speed  (m/s)
         rpm,           # rpm
-        0.0,           # turbo
-        90.0,          # eng_temp
+        turbo,         # turbo
+        eng_temp,      # eng_temp
         fuel,          # fuel
         3.0,           # oil_pressure
         100.0,         # oil_temp
@@ -50,7 +55,7 @@ def _make_packet(
         0,             # show_lights
         throttle,      # throttle
         brake,         # brake
-        0.0,           # clutch
+        clutch,        # clutch
         b" " * 16,     # display1
         b" " * 16,     # display2
     )
@@ -142,3 +147,69 @@ class TestOutGaugeParser:
         data = _make_packet(brake=-0.5)
         state = self.parser.parse(data)
         assert state.brake >= 0.0
+
+    # ── Additional telemetry fields ──────────────────────────────────────────
+
+    def test_clutch_parsed(self):
+        data = _make_packet(clutch=0.6)
+        state = self.parser.parse(data)
+        assert abs(state.clutch - 0.6) < 1e-5
+
+    def test_clutch_clamped(self):
+        data = _make_packet(clutch=-0.1)
+        state = self.parser.parse(data)
+        assert state.clutch >= 0.0
+
+    def test_turbo_parsed(self):
+        data = _make_packet(turbo=1.2)
+        state = self.parser.parse(data)
+        assert abs(state.turbo - 1.2) < 1e-4
+
+    def test_eng_temp_parsed(self):
+        data = _make_packet(eng_temp=95.5)
+        state = self.parser.parse(data)
+        assert abs(state.eng_temp - 95.5) < 0.1
+
+    def test_air_speed_equals_speed(self):
+        """air_speed is derived from the same source as speed."""
+        data = _make_packet(speed_ms=20.0)
+        state = self.parser.parse(data)
+        assert abs(state.air_speed - state.speed) < 1e-4
+
+    # ── Dynamic max RPM ───────────────────────────────────────────────────────
+
+    def test_max_rpm_grows_with_observed_rpm(self):
+        """max_rpm should increase when higher RPM is seen."""
+        self.parser.parse(_make_packet(rpm=5000.0))
+        state = self.parser.parse(_make_packet(rpm=7500.0))
+        assert state.max_rpm >= 7500.0
+
+    def test_max_rpm_does_not_shrink(self):
+        """max_rpm must not fall when RPM drops."""
+        self.parser.parse(_make_packet(rpm=9000.0))
+        state = self.parser.parse(_make_packet(rpm=1000.0))
+        assert state.max_rpm >= 9000.0
+
+    def test_max_rpm_minimum_default(self):
+        """max_rpm has a sensible minimum even at very low RPM."""
+        state = self.parser.parse(_make_packet(rpm=100.0))
+        assert state.max_rpm >= OutGaugeParser._MIN_MAX_RPM
+
+    def test_max_rpm_is_independent_per_parser_instance(self):
+        """Each parser instance maintains its own max RPM."""
+        parser2 = OutGaugeParser()
+        self.parser.parse(_make_packet(rpm=9000.0))
+        state2 = parser2.parse(_make_packet(rpm=3000.0))
+        assert state2.max_rpm < 9000.0
+
+    # ── Wheel power ───────────────────────────────────────────────────────────
+
+    def test_wheel_power_between_zero_and_one(self):
+        data = _make_packet(throttle=0.8, rpm=5000.0)
+        state = self.parser.parse(data)
+        assert 0.0 <= state.wheel_power <= 1.0
+
+    def test_wheel_power_zero_at_zero_throttle(self):
+        data = _make_packet(throttle=0.0, rpm=5000.0)
+        state = self.parser.parse(data)
+        assert state.wheel_power == 0.0
