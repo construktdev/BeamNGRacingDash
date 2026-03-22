@@ -1,0 +1,141 @@
+/* ── Reset & base ─────────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  width: 100%; height: 100%;
+  background: #0a0a0f;
+  color: #e0e0e0;
+  font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Dashboard layout ─────────────────────────────────────────────────────── */
+#dashboard {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  width: 100%;
+  height: 100%;
+  padding: 12px;
+}
+
+/* ── Gauge wrapper ────────────────────────────────────────────────────────── */
+.gauge-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.gauge-wrap canvas {
+  display: block;
+  /* subtle drop shadow for depth */
+  filter: drop-shadow(0 0 12px rgba(0, 160, 255, 0.25));
+}
+
+.gauge-unit {
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #666;
+}
+
+/* ── Centre panel ─────────────────────────────────────────────────────────── */
+#center-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  min-width: 120px;
+}
+
+/* ── Gear display ─────────────────────────────────────────────────────────── */
+#gear-display {
+  font-size: 6rem;
+  font-weight: 900;
+  line-height: 1;
+  color: #fff;
+  text-shadow: 0 0 24px rgba(0, 180, 255, 0.7);
+  letter-spacing: -0.02em;
+  min-width: 80px;
+  text-align: center;
+}
+
+/* ── Pedal / bar indicators ───────────────────────────────────────────────── */
+.pedal-row {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.pedal-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pedal-label {
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  color: #666;
+  width: 30px;
+  text-align: right;
+}
+
+.bar-track {
+  flex: 1;
+  height: 10px;
+  background: #1e1e2a;
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.bar-fill {
+  height: 100%;
+  width: 0%;
+  border-radius: 5px;
+  transition: width 80ms linear;
+}
+
+.bar-fuel     { background: linear-gradient(90deg, #00aaff, #00ddff); }
+.bar-throttle { background: linear-gradient(90deg, #00cc44, #66ff88); }
+.bar-brake    { background: linear-gradient(90deg, #ff3300, #ff7744); }
+
+/* ── Connection status ────────────────────────────────────────────────────── */
+#connection-status {
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  padding: 4px 10px;
+  border-radius: 12px;
+}
+
+.status-connecting {
+  color: #aaa;
+  background: #1e1e2a;
+}
+.status-connected {
+  color: #00ff88;
+  background: rgba(0, 255, 136, 0.1);
+}
+.status-disconnected {
+  color: #ff4444;
+  background: rgba(255, 68, 68, 0.1);
+}
+
+/* ── Responsive scaling ───────────────────────────────────────────────────── */
+@media (max-width: 700px) {
+  #dashboard { gap: 8px; }
+  #gear-display { font-size: 4rem; }
+  .gauge-wrap canvas { width: 200px; height: 200px; }
+}
+
+@media (max-width: 480px) {
+  #dashboard {
+    flex-direction: column;
+    overflow-y: auto;
+  }
+  .gauge-wrap canvas { width: 240px; height: 240px; }
+}

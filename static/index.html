@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>BeamNG Racing Dashboard</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <div id="dashboard">
+
+    <!-- Speedometer -->
+    <div class="gauge-wrap">
+      <canvas id="speedometer" width="280" height="280"></canvas>
+      <span class="gauge-unit">km/h</span>
+    </div>
+
+    <!-- Centre panel: gear, pedals, connection status -->
+    <div id="center-panel">
+      <div id="gear-display">N</div>
+
+      <div class="pedal-row">
+        <div class="pedal-group">
+          <span class="pedal-label">FUEL</span>
+          <div class="bar-track">
+            <div id="fuel-bar" class="bar-fill bar-fuel"></div>
+          </div>
+        </div>
+        <div class="pedal-group">
+          <span class="pedal-label">THR</span>
+          <div class="bar-track">
+            <div id="throttle-bar" class="bar-fill bar-throttle"></div>
+          </div>
+        </div>
+        <div class="pedal-group">
+          <span class="pedal-label">BRK</span>
+          <div class="bar-track">
+            <div id="brake-bar" class="bar-fill bar-brake"></div>
+          </div>
+        </div>
+      </div>
+
+      <div id="connection-status" class="status-connecting">⚡ Connecting…</div>
+    </div>
+
+    <!-- Tachometer -->
+    <div class="gauge-wrap">
+      <canvas id="tachometer" width="280" height="280"></canvas>
+      <span class="gauge-unit">RPM ×1000</span>
+    </div>
+
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
