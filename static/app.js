@@ -29,6 +29,11 @@ const state = {
   turbo: 0,         // bar
   engTemp: 0,       // °C
   wheelPower: 0,    // 0–1
+  handbrake: false, // parking brake engaged
+  abs: false,       // ABS active
+  tc: false,        // traction control active
+  signalLeft: false, // left turn signal
+  signalRight: false, // right turn signal
 };
 
 // ── Gauge drawing ─────────────────────────────────────────────────────────────
@@ -246,21 +251,39 @@ function getGaugeDimensions(canvas) {
 
 // ── DOM references ────────────────────────────────────────────────────────────
 
-const gearEl       = document.getElementById('gear-display');
-const fuelEl       = document.getElementById('fuel-bar');
-const throttleEl   = document.getElementById('throttle-bar');
-const brakeEl      = document.getElementById('brake-bar');
-const clutchEl     = document.getElementById('clutch-bar');
-const powerEl      = document.getElementById('power-bar');
-const statusEl     = document.getElementById('connection-status');
-const airSpeedEl   = document.getElementById('air-speed-value');
-const turboEl      = document.getElementById('turbo-value');
-const engTempEl    = document.getElementById('eng-temp-value');
+const gearEl         = document.getElementById('gear-display');
+const fuelEl         = document.getElementById('fuel-bar');
+const throttleEl     = document.getElementById('throttle-bar');
+const brakeEl        = document.getElementById('brake-bar');
+const clutchEl       = document.getElementById('clutch-bar');
+const powerEl        = document.getElementById('power-bar');
+const statusEl       = document.getElementById('connection-status');
+const airSpeedEl     = document.getElementById('air-speed-value');
+const turboEl        = document.getElementById('turbo-value');
+const engTempEl      = document.getElementById('eng-temp-value');
+const indHandbrakeEl = document.getElementById('ind-handbrake');
+const indAbsEl       = document.getElementById('ind-abs');
+const indTcEl        = document.getElementById('ind-tc');
+const indSigLeftEl   = document.getElementById('ind-signal-left');
+const indSigRightEl  = document.getElementById('ind-signal-right');
 
 function gearLabel(g) {
   if (g === 0) return 'R';
   if (g === 1) return 'N';
   return String(g - 1);
+}
+
+/**
+ * Toggle the "active" CSS class on an indicator element.
+ * @param {HTMLElement} el
+ * @param {boolean} on
+ */
+function setIndicator(el, on) {
+  if (on) {
+    el.classList.add('active');
+  } else {
+    el.classList.remove('active');
+  }
 }
 
 // ── Render loop (~60 FPS, driven by requestAnimationFrame) ───────────────────
@@ -302,6 +325,13 @@ function render() {
   turboEl.textContent    = state.turbo.toFixed(2);
   engTempEl.textContent  = Math.round(state.engTemp);
 
+  // Warning indicators
+  setIndicator(indHandbrakeEl, state.handbrake);
+  setIndicator(indAbsEl,       state.abs);
+  setIndicator(indTcEl,        state.tc);
+  setIndicator(indSigLeftEl,   state.signalLeft);
+  setIndicator(indSigRightEl,  state.signalRight);
+
   requestAnimationFrame(render);
 }
 
@@ -322,18 +352,23 @@ function connectWebSocket() {
   ws.addEventListener('message', (evt) => {
     try {
       const data = JSON.parse(evt.data);
-      if (typeof data.speed      === 'number') state.speed      = data.speed;
-      if (typeof data.rpm        === 'number') state.rpm        = data.rpm;
-      if (typeof data.gear       === 'number') state.gear       = data.gear;
-      if (typeof data.throttle   === 'number') state.throttle   = data.throttle;
-      if (typeof data.brake      === 'number') state.brake      = data.brake;
-      if (typeof data.fuel       === 'number') state.fuel       = data.fuel;
-      if (typeof data.maxRpm     === 'number') state.maxRpm     = data.maxRpm;
-      if (typeof data.airSpeed   === 'number') state.airSpeed   = data.airSpeed;
-      if (typeof data.clutch     === 'number') state.clutch     = data.clutch;
-      if (typeof data.turbo      === 'number') state.turbo      = data.turbo;
-      if (typeof data.engTemp    === 'number') state.engTemp    = data.engTemp;
-      if (typeof data.wheelPower === 'number') state.wheelPower = data.wheelPower;
+      if (typeof data.speed        === 'number')  state.speed        = data.speed;
+      if (typeof data.rpm          === 'number')  state.rpm          = data.rpm;
+      if (typeof data.gear         === 'number')  state.gear         = data.gear;
+      if (typeof data.throttle     === 'number')  state.throttle     = data.throttle;
+      if (typeof data.brake        === 'number')  state.brake        = data.brake;
+      if (typeof data.fuel         === 'number')  state.fuel         = data.fuel;
+      if (typeof data.maxRpm       === 'number')  state.maxRpm       = data.maxRpm;
+      if (typeof data.airSpeed     === 'number')  state.airSpeed     = data.airSpeed;
+      if (typeof data.clutch       === 'number')  state.clutch       = data.clutch;
+      if (typeof data.turbo        === 'number')  state.turbo        = data.turbo;
+      if (typeof data.engTemp      === 'number')  state.engTemp      = data.engTemp;
+      if (typeof data.wheelPower   === 'number')  state.wheelPower   = data.wheelPower;
+      if (typeof data.handbrake    === 'boolean') state.handbrake    = data.handbrake;
+      if (typeof data.abs          === 'boolean') state.abs          = data.abs;
+      if (typeof data.tc           === 'boolean') state.tc           = data.tc;
+      if (typeof data.signalLeft   === 'boolean') state.signalLeft   = data.signalLeft;
+      if (typeof data.signalRight  === 'boolean') state.signalRight  = data.signalRight;
     } catch (_) {
       // Malformed packet – ignore
     }

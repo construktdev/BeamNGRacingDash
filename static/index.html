@@ -11,7 +11,7 @@
 
     <!-- Speedometer -->
     <div class="gauge-wrap">
-      <canvas id="speedometer" width="280" height="280"></canvas>
+      <canvas id="speedometer" width="340" height="340"></canvas>
       <span class="gauge-unit">km/h</span>
       <div class="air-speed-row">
         <span class="air-speed-label">AIR</span>
@@ -20,9 +20,18 @@
       </div>
     </div>
 
-    <!-- Centre panel: gear, pedals, telemetry, connection status -->
+    <!-- Centre panel: gear, indicators, pedals, telemetry, connection status -->
     <div id="center-panel">
       <div id="gear-display">N</div>
+
+      <!-- Warning indicator lights -->
+      <div id="indicators">
+        <div class="indicator ind-signal-left" id="ind-signal-left" title="Left turn signal">&#9664;</div>
+        <div class="indicator ind-handbrake" id="ind-handbrake" title="Parking brake">P</div>
+        <div class="indicator ind-abs" id="ind-abs" title="ABS active">ABS</div>
+        <div class="indicator ind-tc" id="ind-tc" title="Traction control">TC</div>
+        <div class="indicator ind-signal-right" id="ind-signal-right" title="Right turn signal">&#9654;</div>
+      </div>
 
       <div class="pedal-row">
         <div class="pedal-group">
@@ -76,7 +85,7 @@
 
     <!-- Tachometer -->
     <div class="gauge-wrap">
-      <canvas id="tachometer" width="280" height="280"></canvas>
+      <canvas id="tachometer" width="340" height="340"></canvas>
       <span class="gauge-unit">RPM ×1000</span>
     </div>
 

@@ -34,6 +34,7 @@ def _make_packet(
     turbo: float = 0.0,
     eng_temp: float = 90.0,
     clutch: float = 0.0,
+    show_lights: int = 0,
     include_id: bool = True,
 ) -> bytes:
     """Build a syntactically valid OutGauge packet."""
@@ -52,7 +53,7 @@ def _make_packet(
         3.0,           # oil_pressure
         100.0,         # oil_temp
         0,             # dash_lights
-        0,             # show_lights
+        show_lights,   # show_lights
         throttle,      # throttle
         brake,         # brake
         clutch,        # clutch
@@ -213,3 +214,55 @@ class TestOutGaugeParser:
         data = _make_packet(throttle=0.0, rpm=5000.0)
         state = self.parser.parse(data)
         assert state.wheel_power == 0.0
+
+    # ── Indicator / warning lights ────────────────────────────────────────────
+
+    def test_indicators_off_by_default(self):
+        """All indicators default to False when show_lights is 0."""
+        state = self.parser.parse(_make_packet(show_lights=0))
+        assert state.handbrake is False
+        assert state.abs_active is False
+        assert state.tc_active is False
+        assert state.signal_left is False
+        assert state.signal_right is False
+
+    def test_handbrake_bit(self):
+        """DL_HANDBRAKE = 0x04 sets handbrake=True."""
+        state = self.parser.parse(_make_packet(show_lights=0x04))
+        assert state.handbrake is True
+        assert state.abs_active is False
+
+    def test_abs_bit(self):
+        """DL_ABS = 0x400 sets abs_active=True."""
+        state = self.parser.parse(_make_packet(show_lights=0x400))
+        assert state.abs_active is True
+        assert state.handbrake is False
+
+    def test_tc_bit(self):
+        """DL_TC = 0x10 sets tc_active=True."""
+        state = self.parser.parse(_make_packet(show_lights=0x10))
+        assert state.tc_active is True
+
+    def test_signal_left_bit(self):
+        """DL_SIGNAL_L = 0x20 sets signal_left=True."""
+        state = self.parser.parse(_make_packet(show_lights=0x20))
+        assert state.signal_left is True
+        assert state.signal_right is False
+
+    def test_signal_right_bit(self):
+        """DL_SIGNAL_R = 0x40 sets signal_right=True."""
+        state = self.parser.parse(_make_packet(show_lights=0x40))
+        assert state.signal_right is True
+        assert state.signal_left is False
+
+    def test_multiple_indicators_simultaneously(self):
+        """Handbrake + ABS can both be active at the same time."""
+        state = self.parser.parse(_make_packet(show_lights=0x04 | 0x400))
+        assert state.handbrake is True
+        assert state.abs_active is True
+
+    def test_both_turn_signals(self):
+        """Left and right signals can both be active (hazard lights)."""
+        state = self.parser.parse(_make_packet(show_lights=0x20 | 0x40))
+        assert state.signal_left is True
+        assert state.signal_right is True
