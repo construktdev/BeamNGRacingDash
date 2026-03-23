@@ -61,6 +61,11 @@ class TelemetryState:
     turbo: float = 0.0        # turbo pressure (bar)
     eng_temp: float = 0.0     # engine temperature (°C)
     wheel_power: float = 0.0  # estimated wheel-power index (0–1)
+    handbrake: bool = False    # parking/handbrake applied (DL_HANDBRAKE bit)
+    abs_active: bool = False   # ABS currently active   (DL_ABS bit)
+    tc_active: bool = False    # traction control active (DL_TC bit)
+    signal_left: bool = False  # left turn signal on    (DL_SIGNAL_L bit)
+    signal_right: bool = False # right turn signal on   (DL_SIGNAL_R bit)
     timestamp: float = field(default_factory=time.time)
 
 
@@ -90,10 +95,20 @@ class OutGaugeParser:
             turbo = fields[7]
             eng_temp = fields[8]
             fuel = fields[9]
+            # fields[12] = DashLights (which lights are connected)
+            # fields[13] = ShowLights (which lights are currently lit)
+            show_lights = int(fields[13])
             throttle = fields[14]
             brake = fields[15]
             clutch = fields[16]
             gear = int(fields[3])
+
+            # OutGauge DashLight bit flags (LFS/BeamNG protocol)
+            _DL_HANDBRAKE = 0x04
+            _DL_TC        = 0x10
+            _DL_SIGNAL_L  = 0x20
+            _DL_SIGNAL_R  = 0x40
+            _DL_ABS       = 0x400
 
             rpm = max(0.0, rpm)
 
@@ -120,6 +135,11 @@ class OutGaugeParser:
                 turbo=max(0.0, turbo),
                 eng_temp=max(0.0, eng_temp),
                 wheel_power=wheel_power,
+                handbrake=bool(show_lights & _DL_HANDBRAKE),
+                abs_active=bool(show_lights & _DL_ABS),
+                tc_active=bool(show_lights & _DL_TC),
+                signal_left=bool(show_lights & _DL_SIGNAL_L),
+                signal_right=bool(show_lights & _DL_SIGNAL_R),
                 timestamp=time.time(),
             )
         except struct.error:

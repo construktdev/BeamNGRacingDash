@@ -71,6 +71,11 @@ class UpdateController:
                     "turbo": round(state.turbo, 3),
                     "engTemp": round(state.eng_temp, 1),
                     "wheelPower": round(state.wheel_power, 3),
+                    "handbrake": state.handbrake,
+                    "abs": state.abs_active,
+                    "tc": state.tc_active,
+                    "signalLeft": state.signal_left,
+                    "signalRight": state.signal_right,
                 }
             )
 
