@@ -270,6 +270,29 @@ html, body {
   background: rgba(255, 68, 68, 0.1);
 }
 
+/* ── Fullscreen button ────────────────────────────────────────────────────── */
+#fullscreen-btn {
+  position: fixed;
+  top: 10px;
+  right: 12px;
+  z-index: 100;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #888;
+  font-size: 1.1rem;
+  line-height: 1;
+  padding: 5px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 120ms ease, color 120ms ease;
+  user-select: none;
+}
+
+#fullscreen-btn:hover {
+  background: rgba(255, 255, 255, 0.14);
+  color: #ccc;
+}
+
 /* ── Responsive scaling ───────────────────────────────────────────────────── */
 @media (max-width: 800px) {
   #dashboard { gap: 10px; }

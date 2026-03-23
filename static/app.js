@@ -388,3 +388,83 @@ function connectWebSocket() {
 }
 
 connectWebSocket();
+
+// ── Fullscreen & Wake Lock ────────────────────────────────────────────────────
+
+const fullscreenBtn = document.getElementById('fullscreen-btn');
+let wakeLock = null;
+
+/** Request a screen wake lock, suppressing errors on unsupported browsers. */
+async function acquireWakeLock() {
+  if (!('wakeLock' in navigator)) return;
+  if (wakeLock) return;  // already held
+  try {
+    wakeLock = await navigator.wakeLock.request('screen');
+    wakeLock.addEventListener('release', () => { wakeLock = null; });
+  } catch (err) {
+    // Wake Lock denied or not supported – screen may still dim
+    console.warn('Wake Lock could not be acquired:', err);
+  }
+}
+
+/** Release the wake lock if one is held. */
+async function releaseWakeLock() {
+  if (wakeLock) {
+    await wakeLock.release();
+    wakeLock = null;
+  }
+}
+
+/** Return the current fullscreen element, handling vendor prefixes. */
+function getFullscreenElement() {
+  return document.fullscreenElement || document.webkitFullscreenElement || null;
+}
+
+/** Sync the button label and title to the current fullscreen state. */
+function updateFullscreenButton() {
+  const isFs = !!getFullscreenElement();
+  fullscreenBtn.textContent = isFs ? '\u229F' : '\u26F6';
+  fullscreenBtn.title = isFs ? 'Exit fullscreen' : 'Enter fullscreen';
+  fullscreenBtn.setAttribute('aria-label', isFs ? 'Exit fullscreen' : 'Enter fullscreen');
+}
+
+fullscreenBtn.addEventListener('click', async () => {
+  if (!getFullscreenElement()) {
+    const el = document.documentElement;
+    if (el.requestFullscreen) {
+      await el.requestFullscreen();
+    } else if (el.webkitRequestFullscreen) {
+      await el.webkitRequestFullscreen();
+    }
+    await acquireWakeLock();
+  } else {
+    if (document.exitFullscreen) {
+      await document.exitFullscreen();
+    } else if (document.webkitExitFullscreen) {
+      await document.webkitExitFullscreen();
+    }
+    await releaseWakeLock();
+  }
+});
+
+// Sync button state when fullscreen is exited via Escape or browser chrome
+document.addEventListener('fullscreenchange', async () => {
+  updateFullscreenButton();
+  if (!getFullscreenElement()) {
+    await releaseWakeLock();
+  }
+});
+document.addEventListener('webkitfullscreenchange', async () => {
+  updateFullscreenButton();
+  if (!getFullscreenElement()) {
+    await releaseWakeLock();
+  }
+});
+
+// Re-acquire wake lock when the tab becomes visible again (browsers release it
+// automatically when the tab is hidden)
+document.addEventListener('visibilitychange', async () => {
+  if (document.visibilityState === 'visible' && getFullscreenElement()) {
+    await acquireWakeLock();
+  }
+});
