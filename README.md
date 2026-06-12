@@ -2,6 +2,11 @@
 
 A real-time racing telemetry dashboard for [BeamNG.drive](https://www.beamng.com/). It receives live vehicle data from the simulator over UDP, then streams it to one or more browsers via WebSocket so you can watch speed, RPM, gear, throttle, brake, and fuel at a glance — even on a second screen or tablet.
 
+> [!IMPORTANT]
+> This project was primarily generated with AI. <br>
+> It is provided as-is, without any warranty or guarantee. <br>
+> I do not provide support, maintenance, or assistance for its use.
+
 ---
 
 ## Table of Contents
